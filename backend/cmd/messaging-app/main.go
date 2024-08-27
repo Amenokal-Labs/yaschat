@@ -20,6 +20,20 @@ type Message struct {
 
 const FILENAME = "messages.csv"
 
+func enableCORS(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS") // Allow specific HTTP methods
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Allow specific headers
+
+        if r.Method == http.MethodOptions {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
 
 func initializeCSV() error {
     // Create or truncate the file
@@ -111,25 +125,29 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
-	r := mux.NewRouter()
+    r := mux.NewRouter()
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello, Messaging App!")
-	}).Methods("GET")
+    // Apply CORS middleware
+    r.Use(enableCORS)
 
-	// Route to create a message
-	r.HandleFunc("/message", createMessage).Methods("POST")
+    r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintln(w, "Hello, Messaging App!")
+    }).Methods("GET")
 
-	// Route to retrieve messages by "from" and "to"
-	r.HandleFunc("/messages", getMessages).Methods("GET")
+    // Route to create a message
+    r.HandleFunc("/message", createMessage).Methods("POST")
 
-	log.Println("Server starting on :8080")
-	if err := initializeCSV(); err != nil {
-		log.Fatalf("Failed to initialize CSV file: %v", err)
-	}
-	log.Println("CSV file initialized successfully")
+    // Route to retrieve messages by "from" and "to"
+    r.HandleFunc("/messages", getMessages).Methods("GET")
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		log.Fatalf("could not start server: %s", err)
-	}
+    log.Println("Server starting on :8080")
+    if err := initializeCSV(); err != nil {
+        log.Fatalf("Failed to initialize CSV file: %v", err)
+    }
+    log.Println("CSV file initialized successfully")
+
+    if err := http.ListenAndServe(":8080", r); err != nil {
+        log.Fatalf("could not start server: %s", err)
+    }
 }
+
