@@ -18,7 +18,7 @@ const ChatComponent = () => {
     const fetchMessages = async () => {
         try {
             const response = await axios.get(`http://localhost:8080/messages?from=${from}&to=${to}`);
-            setMessages(response.data);
+            setMessages(response.data || []); // Set messages to an empty array if response.data is null
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -26,14 +26,14 @@ const ChatComponent = () => {
 
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !from.trim() || !to.trim() || !subject.trim()) return;
-
+    
         const messagePayload = {
             from: from,
             to: to,
             subject: subject,
             content: newMessage,
         };
-
+    
         try {
             await axios.post('http://localhost:8080/message', messagePayload);
             setNewMessage('');
@@ -73,14 +73,18 @@ const ChatComponent = () => {
                 <button onClick={handleSendMessage}>Send</button>
             </div>
             <div className="messages">
-                {messages.map((message, index) => (
-                    <div key={index} className="message">
-                        <strong>From:</strong> {message.from} <br />
-                        <strong>To:</strong> {message.to} <br />
-                        <strong>Subject:</strong> {message.subject} <br />
-                        <strong>Message:</strong> {message.content}
-                    </div>
-                ))}
+                {messages && messages.length > 0 ? (
+                    messages.map((message, index) => (
+                        <div key={index} className="message">
+                            <strong>From:</strong> {message.from} <br />
+                            <strong>To:</strong> {message.to} <br />
+                            <strong>Subject:</strong> {message.subject} <br />
+                            <strong>Message:</strong> {message.content}
+                        </div>
+                    ))
+                ) : (
+                    <div>No messages available</div>
+                )}
             </div>
         </div>
     );

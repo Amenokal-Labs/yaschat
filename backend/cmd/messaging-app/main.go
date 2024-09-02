@@ -22,18 +22,22 @@ const FILENAME = "messages.csv"
 
 func enableCORS(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
-        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS") // Allow specific HTTP methods
-        w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Allow specific headers
+        // Set CORS headers for the main request
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
+        // Handle preflight requests
         if r.Method == http.MethodOptions {
-            w.WriteHeader(http.StatusOK)
+            w.WriteHeader(http.StatusNoContent) // 204 No Content response for preflight
             return
         }
 
+        // Pass to the next handler
         next.ServeHTTP(w, r)
     })
 }
+
 
 func initializeCSV() error {
     // Create or truncate the file
@@ -114,11 +118,6 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if len(messages) == 0 {
-		http.Error(w, "No messages found", http.StatusNotFound)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
 }
@@ -127,8 +126,16 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 func main() {
     r := mux.NewRouter()
 
-    // Apply CORS middleware
+    // Apply CORS middleware globally
     r.Use(enableCORS)
+
+	// Handle preflight requests for all routes
+    r.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+        w.WriteHeader(http.StatusOK)
+    })
 
     r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintln(w, "Hello, Messaging App!")
@@ -150,4 +157,5 @@ func main() {
         log.Fatalf("could not start server: %s", err)
     }
 }
+
 
