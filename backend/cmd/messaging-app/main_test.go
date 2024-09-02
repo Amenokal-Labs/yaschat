@@ -37,8 +37,11 @@ func TestMessagingApp(t *testing.T) {
 		r.HandleFunc("/messages", getMessages).Methods("GET")
 		r.ServeHTTP(rr, req)
 
-		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Contains(t, rr.Body.String(), "No messages found")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		body, _ := ioutil.ReadAll(rr.Body)
+		var messages []Message
+		json.Unmarshal(body, &messages)
+		assert.Equal(t, 0, len(messages))
 	})
 
 	t.Run("Create messages", func(t *testing.T) {
