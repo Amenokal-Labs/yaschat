@@ -106,7 +106,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 
 	var messages []Message
 	for _, record := range records[1:] { // Skip header
-		if record[0] == from && record[1] == to {
+		if (record[0] == from && record[1] == to) || (record[0] == to && record[1] == from) {
 			msg := Message{
 				From:    record[0],
 				To:      record[1],
@@ -114,6 +114,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 			}
 			messages = append(messages, msg)
 		}
+		
 	}
 
 	w.Header().Set("Content-Type", "application/json")
