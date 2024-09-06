@@ -14,7 +14,6 @@ import (
 type Message struct {
 	From    string `json:"from"`
 	To      string `json:"to"`
-	Subject string `json:"subject"`
 	Content string `json:"content"`
 }
 
@@ -52,7 +51,7 @@ func initializeCSV() error {
     defer writer.Flush()
 
     // Write the header row
-    header := []string{"from", "to", "subject", "content"}
+    header := []string{"from", "to", "content"}
     if err := writer.Write(header); err != nil {
         return err
     }
@@ -77,7 +76,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	record := []string{msg.From, msg.To, msg.Subject, msg.Content}
+	record := []string{msg.From, msg.To, msg.Content}
 	if err := writer.Write(record); err != nil {
 		http.Error(w, "Failed to write to CSV file", http.StatusInternalServerError)
 		return
@@ -111,8 +110,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 			msg := Message{
 				From:    record[0],
 				To:      record[1],
-				Subject: record[2],
-				Content: record[3],
+				Content: record[2],
 			}
 			messages = append(messages, msg)
 		}

@@ -45,8 +45,8 @@ func TestMessagingApp(t *testing.T) {
 	})
 
 	t.Run("Create messages", func(t *testing.T) {
-		msg1 := Message{From: "Alice", To: "Bob", Subject: "Hello", Content: "Hi Bob!"}
-		msg2 := Message{From: "Bob", To: "Alice", Subject: "Re: Hello", Content: "Hi Alice!"}
+		msg1 := Message{From: "Alice", To: "Bob", Content: "Hi Bob!"}
+		msg2 := Message{From: "Bob", To: "Alice", Content: "Hi Alice!"}
 
 		// Create first message
 		body, _ := json.Marshal(msg1)
@@ -83,7 +83,6 @@ func TestMessagingApp(t *testing.T) {
 		assert.Equal(t, 1, len(messages))
 		assert.Equal(t, "Alice", messages[0].From)
 		assert.Equal(t, "Bob", messages[0].To)
-		assert.Equal(t, "Hello", messages[0].Subject)
 		assert.Equal(t, "Hi Bob!", messages[0].Content)
 
 		req, _ = http.NewRequest("GET", "/messages?from=Bob&to=Alice", nil)
@@ -98,7 +97,6 @@ func TestMessagingApp(t *testing.T) {
 		assert.Equal(t, 1, len(messages))
 		assert.Equal(t, "Bob", messages[0].From)
 		assert.Equal(t, "Alice", messages[0].To)
-		assert.Equal(t, "Re: Hello", messages[0].Subject)
 		assert.Equal(t, "Hi Alice!", messages[0].Content)
 	})
 }
