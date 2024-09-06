@@ -80,10 +80,13 @@ func TestMessagingApp(t *testing.T) {
 		var messages []Message
 		json.Unmarshal(body, &messages)
 
-		assert.Equal(t, 1, len(messages))
+		assert.Equal(t, 2, len(messages))
 		assert.Equal(t, "Alice", messages[0].From)
 		assert.Equal(t, "Bob", messages[0].To)
 		assert.Equal(t, "Hi Bob!", messages[0].Content)
+		assert.Equal(t, "Bob", messages[1].From)
+		assert.Equal(t, "Alice", messages[1].To)
+		assert.Equal(t, "Hi Alice!", messages[1].Content)
 
 		req, _ = http.NewRequest("GET", "/messages?from=Bob&to=Alice", nil)
 		rr = httptest.NewRecorder()
@@ -94,9 +97,12 @@ func TestMessagingApp(t *testing.T) {
 		body, _ = ioutil.ReadAll(rr.Body)
 		json.Unmarshal(body, &messages)
 
-		assert.Equal(t, 1, len(messages))
-		assert.Equal(t, "Bob", messages[0].From)
-		assert.Equal(t, "Alice", messages[0].To)
-		assert.Equal(t, "Hi Alice!", messages[0].Content)
+		assert.Equal(t, 2, len(messages))
+		assert.Equal(t, "Alice", messages[0].From)
+		assert.Equal(t, "Bob", messages[0].To)
+		assert.Equal(t, "Hi Bob!", messages[0].Content)
+		assert.Equal(t, "Bob", messages[1].From)
+		assert.Equal(t, "Alice", messages[1].To)
+		assert.Equal(t, "Hi Alice!", messages[1].Content)
 	})
 }

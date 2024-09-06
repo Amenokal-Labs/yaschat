@@ -67,7 +67,11 @@ const ChatComponent = () => {
             <div className="messages">
                 {messages && messages.length > 0 ? (
                     messages.map((message, index) => (
-                        <div key={index} className="message">
+                        <div 
+                            key={index} 
+                            className="message" 
+                            style={{ color: message.from === to ? 'gray' : 'black' }} // Messages from the recipient in gray
+                        >
                             <strong>From:</strong> {message.from} <br />
                             <strong>To:</strong> {message.to} <br />
                             <strong>Message:</strong> {message.content}
