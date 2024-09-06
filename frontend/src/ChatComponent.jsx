@@ -6,7 +6,6 @@ const ChatComponent = () => {
     const [newMessage, setNewMessage] = useState('');
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
-    const [subject, setSubject] = useState('');
 
     useEffect(() => {
         if (from && to) {
@@ -25,12 +24,11 @@ const ChatComponent = () => {
     };
 
     const handleSendMessage = async () => {
-        if (!newMessage.trim() || !from.trim() || !to.trim() || !subject.trim()) return;
+        if (!newMessage.trim() || !from.trim() || !to.trim()) return;
     
         const messagePayload = {
             from: from,
             to: to,
-            subject: subject,
             content: newMessage,
         };
     
@@ -60,12 +58,6 @@ const ChatComponent = () => {
                 />
                 <input 
                     type="text" 
-                    value={subject} 
-                    onChange={(e) => setSubject(e.target.value)} 
-                    placeholder="Subject" 
-                />
-                <input 
-                    type="text" 
                     value={newMessage} 
                     onChange={(e) => setNewMessage(e.target.value)} 
                     placeholder="Type a message..." 
@@ -78,7 +70,6 @@ const ChatComponent = () => {
                         <div key={index} className="message">
                             <strong>From:</strong> {message.from} <br />
                             <strong>To:</strong> {message.to} <br />
-                            <strong>Subject:</strong> {message.subject} <br />
                             <strong>Message:</strong> {message.content}
                         </div>
                     ))
