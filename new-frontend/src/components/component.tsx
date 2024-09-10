@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,15 +28,13 @@ export function Component() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
 
-  // Fetch conversations when the component mounts
   useEffect(() => {
-    fetch("/api/conversations?user_id=currentUserId") // Replace 'currentUserId' with the actual user ID
+    fetch("/api/conversations?user_id=currentUserId")
       .then((response) => response.json())
       .then((data) => setConversations(data))
       .catch((error) => console.error("Error fetching conversations:", error));
   }, []);
 
-  // Fetch messages when a conversation is selected
   useEffect(() => {
     if (selectedConversation) {
       fetch(`/api/conversations/${selectedConversation.conversation_id}/messages`)
@@ -44,14 +44,13 @@ export function Component() {
     }
   }, [selectedConversation]);
 
-  // Handle sending a new message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const message = {
-      from: "currentUserId", // Replace with the actual sender's ID
-      to: selectedConversation.participants.find((id) => id !== "currentUserId"), // Find recipient
+      from: "currentUserId",
+      to: selectedConversation.participants.find((id) => id !== "currentUserId"),
       content: newMessage,
       timestamp: new Date().toISOString(),
     };
@@ -67,7 +66,6 @@ export function Component() {
         throw new Error("Failed to send message");
       }
 
-      // Clear the input field and update messages state
       setNewMessage("");
       setMessages((prevMessages) => [...prevMessages, message]);
     } catch (error) {
@@ -76,8 +74,8 @@ export function Component() {
   };
 
   return (
-    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full rounded-lg overflow-hidden border">
-      <div className="bg-muted/20 p-3 border-r">
+    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-full min-h-[500px] rounded-lg overflow-hidden border"> {/* Added min-h-[500px] */}
+      <div className="bg-muted/20 p-3 border-r flex flex-col h-full">
         <div className="flex items-center justify-between space-x-4">
           <div className="font-medium text-sm">Messenger</div>
           <Button variant="ghost" size="icon" className="rounded-full w-8 h-8">
@@ -90,7 +88,7 @@ export function Component() {
             <Input placeholder="Search" className="h-8" />
           </form>
         </div>
-        <div className="grid gap-2">
+        <div className="grid gap-2 flex-grow overflow-y-auto"> {/* Added flex-grow and overflow-y-auto */}
           {conversations.map((conversation) => (
             <Link
               key={conversation.conversation_id}
@@ -114,7 +112,7 @@ export function Component() {
           ))}
         </div>
       </div>
-      <div>
+      <div className="flex flex-col h-full">
         <div className="p-3 flex border-b items-center">
           {selectedConversation && (
             <div className="flex items-center gap-2">
@@ -131,7 +129,7 @@ export function Component() {
             </div>
           )}
         </div>
-        <div className="grid gap-4 p-3">
+        <div className="grid gap-4 p-3 flex-grow overflow-y-auto"> {/* Added flex-grow and overflow-y-auto */}
           {messages.map((message) => (
             <div key={message.id} className={`flex w-max max-w-[65%] flex-col gap-2 rounded-full px-4 py-2 text-sm ${message.from === "currentUserId" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
               {message.content}
@@ -175,9 +173,8 @@ function PenIcon(props) {
     >
       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
     </svg>
-  )
+  );
 }
-
 
 function SendIcon(props) {
   return (
@@ -196,5 +193,5 @@ function SendIcon(props) {
       <path d="m22 2-7 20-4-9-9-4Z" />
       <path d="M22 2 11 13" />
     </svg>
-  )
+  );
 }
