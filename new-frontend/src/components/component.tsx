@@ -22,18 +22,20 @@ type Conversation = {
 };
 
 // Main component function
-export function Component() {
+export function Component({ currentUserName }: { currentUserName: string }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
 
   useEffect(() => {
-    fetch("/api/conversations?user_id=currentUserId")
-      .then((response) => response.json())
-      .then((data) => setConversations(data))
-      .catch((error) => console.error("Error fetching conversations:", error));
-  }, []);
+    if (currentUserName) {
+      fetch(`/api/conversations?name=${currentUserName}`)
+        .then((response) => response.json())
+        .then((data) => setConversations(data))
+        .catch((error) => console.error("Error fetching conversations:", error));
+    }
+  }, [currentUserName]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -44,16 +46,46 @@ export function Component() {
     }
   }, [selectedConversation]);
 
+  const createConversation = async (contactName: string) => {
+    const newConversation = {
+      participants: [currentUserName, contactName],
+    };
+  
+    try {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newConversation),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+  
+      const newConv = await response.json();
+      setConversations((prevConversations) => [...prevConversations, newConv]);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  };
+  
+  const handleNewMessageClick = () => {
+    const contactName = prompt("Enter the ID of the contact you want to message:");
+    if (contactName) {
+      createConversation(contactName);
+    }
+  };
+  
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const message = {
-      from: "currentUserId",
-      to: selectedConversation.participants.find((id) => id !== "currentUserId"),
+      from_name: currentUserName,
+      to_name: selectedConversation.participants.find((name) => name !== currentUserName),
       content: newMessage,
       timestamp: new Date().toISOString(),
-    };
+    };  
 
     try {
       const response = await fetch(`/api/conversations/${selectedConversation.conversation_id}/messages`, {
@@ -78,7 +110,7 @@ export function Component() {
       <div className="bg-muted/20 p-3 border-r flex flex-col h-full">
         <div className="flex items-center justify-between space-x-4">
           <div className="font-medium text-sm">Messenger</div>
-          <Button variant="ghost" size="icon" className="rounded-full w-8 h-8">
+          <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={handleNewMessageClick}>
             <PenIcon className="h-4 w-4" />
             <span className="sr-only">New message</span>
           </Button>
