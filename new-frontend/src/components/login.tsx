@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -8,17 +8,18 @@ export function Login() {
     const router = useRouter();
 
     const handleLogin = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
         try {
-            const response = await fetch("/api/login", {
+            const response = await fetch("http://localhost:8080/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name }),
             });
             const data = await response.json();
-            if (response.ok) {
+            if (response.ok) { 
                 // Save user data or token to localStorage or state management
-                router.push("/messaging"); // Navigate to messaging page
+                localStorage.setItem("currentUserName", name); // Save name for future use
+                router.push("/"); // Navigate to messaging page
             } else {
                 throw new Error(data.message);
             }

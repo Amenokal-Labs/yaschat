@@ -12,17 +12,17 @@ export default function Home() {
   useEffect(() => {
     // Check for a logged-in user (could be from localStorage, cookies, etc.)
     const storedUserName = localStorage.getItem("currentUserName");
-    if (storedUserName) {
+    if (storedUserName) { 
       setCurrentUserName(storedUserName); // Set the user if found
     } else {
-      router.push("/login"); // Redirect to login page if not found
+     // router.push("/");  //Redirect to login page if not found
     }
   }, [router]);
 
-  if (!currentUserName) {
+ /** if (!currentUserName) {
     // Show a loading state or just return null until the useEffect completes
     return null;
-  }
+  }  **/ 
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -35,4 +35,4 @@ export default function Home() {
       </main>
     </div>
   );
-}
+} 

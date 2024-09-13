@@ -30,7 +30,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
   useEffect(() => {
     if (currentUserName) {
-      fetch(`/api/conversations?name=${currentUserName}`)
+      fetch(`http://localhost:8080/api/conversations?name=${currentUserName}`)
         .then((response) => response.json())
         .then((data) => setConversations(data))
         .catch((error) => console.error("Error fetching conversations:", error));
@@ -39,7 +39,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
   useEffect(() => {
     if (selectedConversation) {
-      fetch(`/api/conversations/${selectedConversation.conversation_id}/messages`)
+      fetch(`http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`)
         .then((response) => response.json())
         .then((data) => setMessages(data))
         .catch((error) => console.error("Error fetching messages:", error));
@@ -52,22 +52,27 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     };
   
     try {
-      const response = await fetch("/api/conversations", {
+      const response = await fetch("http://localhost:8080/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newConversation),
       });
   
       if (!response.ok) {
-        throw new Error("Failed to create conversation");
+        const text = await response.text(); // Read the response as text
+        throw new Error(`Failed to create conversation: ${text}`);
       }
   
       const newConv = await response.json();
-      setConversations((prevConversations) => [...prevConversations, newConv]);
+  
+      // Check if the new conversation is valid
+      if (newConv && Array.isArray(conversations)) {
+        setConversations((prevConversations) => [...(prevConversations || []), newConv]);
+      }
     } catch (error) {
       console.error("Error creating conversation:", error);
     }
-  };
+  };  
   
   const handleNewMessageClick = () => {
     const contactName = prompt("Enter the ID of the contact you want to message:");
@@ -87,8 +92,10 @@ export function Component({ currentUserName }: { currentUserName: string }) {
       timestamp: new Date().toISOString(),
     };  
 
+    console.log("message: ", message);
+
     try {
-      const response = await fetch(`/api/conversations/${selectedConversation.conversation_id}/messages`, {
+      const response = await fetch(`http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(message),
@@ -121,7 +128,8 @@ export function Component({ currentUserName }: { currentUserName: string }) {
           </form>
         </div>
         <div className="grid gap-2 flex-grow overflow-y-auto"> {/* Added flex-grow and overflow-y-auto */}
-          {conversations.map((conversation) => (
+        {conversations?.length > 0 ? (
+          conversations.map((conversation) => (
             <Link
               key={conversation.conversation_id}
               href="#"
@@ -141,7 +149,9 @@ export function Component({ currentUserName }: { currentUserName: string }) {
                 </p>
               </div>
             </Link>
-          ))}
+          ))) : (
+            <p>No conversations found</p>
+          )}
         </div>
       </div>
       <div className="flex flex-col h-full">
