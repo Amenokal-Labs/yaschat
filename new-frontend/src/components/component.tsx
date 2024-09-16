@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Types for conversations and messages
 type Message = {
@@ -46,25 +45,32 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     }
   }, [selectedConversation]);
 
+  const getContactName = (participants: string[]): string|undefined => {
+    return participants.find((name) => name !== currentUserName);
+  };
+
   const createConversation = async (contactName: string) => {
+    const participants = [currentUserName, contactName];
+    const sortedParticipants = [...participants].sort();
+
     const newConversation = {
-      participants: [currentUserName, contactName],
+      participants: sortedParticipants,
     };
-  
+
     try {
       const response = await fetch("http://localhost:8080/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newConversation),
       });
-  
+
       if (!response.ok) {
         const text = await response.text(); // Read the response as text
         throw new Error(`Failed to create conversation: ${text}`);
       }
-  
+
       const newConv = await response.json();
-  
+
       // Check if the new conversation is valid
       if (newConv && Array.isArray(conversations)) {
         setConversations((prevConversations) => [...(prevConversations || []), newConv]);
@@ -72,27 +78,25 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     } catch (error) {
       console.error("Error creating conversation:", error);
     }
-  };  
-  
+  };
+
   const handleNewMessageClick = () => {
-    const contactName = prompt("Enter the ID of the contact you want to message:");
+    const contactName = prompt("Enter the name of the contact you want to message:");
     if (contactName) {
       createConversation(contactName);
     }
   };
-  
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const message = {
       from_name: currentUserName,
-      to_name: selectedConversation.participants.find((name) => name !== currentUserName),
+      to_name: getContactName(selectedConversation.participants),
       content: newMessage,
       timestamp: new Date().toISOString(),
-    };  
-
-    console.log("message: ", message);
+    };
 
     try {
       const response = await fetch(`http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`, {
@@ -113,7 +117,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
   };
 
   return (
-    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-full min-h-[500px] rounded-lg overflow-hidden border"> {/* Added min-h-[500px] */}
+    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-full min-h-[500px] rounded-lg overflow-hidden border">
       <div className="bg-muted/20 p-3 border-r flex flex-col h-full">
         <div className="flex items-center justify-between space-x-4">
           <div className="font-medium text-sm">Messenger</div>
@@ -127,29 +131,26 @@ export function Component({ currentUserName }: { currentUserName: string }) {
             <Input placeholder="Search" className="h-8" />
           </form>
         </div>
-        <div className="grid gap-2 flex-grow overflow-y-auto"> {/* Added flex-grow and overflow-y-auto */}
-        {conversations?.length > 0 ? (
-          conversations.map((conversation) => (
-            <Link
-              key={conversation.conversation_id}
-              href="#"
-              className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 bg-muted"
-              onClick={() => setSelectedConversation(conversation)}
-            >
-              <Avatar className="border w-10 h-10">
-                <AvatarImage src="/placeholder-user.jpg" alt="Image" />
-                <AvatarFallback>OM</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-0.5">
-                <p className="text-sm font-medium leading-none">
-                  {conversation.participants.join(", ")}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {conversation.last_message.content} &middot; {new Date(conversation.last_message.timestamp).toLocaleTimeString()}
-                </p>
-              </div>
-            </Link>
-          ))) : (
+        <div className="grid gap-2 flex-grow overflow-y-auto">
+          {conversations?.length > 0 ? (
+            conversations.map((conversation) => (
+              <Link
+                key={conversation.conversation_id}
+                href="#"
+                className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 bg-muted"
+                onClick={() => setSelectedConversation(conversation)}
+              >
+                <div className="grid gap-0.5">
+                  <p className="text-sm font-medium leading-none">
+                    {getContactName(conversation.participants)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {conversation.last_message.content} &middot; {new Date(conversation.last_message.timestamp).toLocaleTimeString()}
+                  </p>
+                </div>
+              </Link>
+            ))
+          ) : (
             <p>No conversations found</p>
           )}
         </div>
@@ -158,25 +159,23 @@ export function Component({ currentUserName }: { currentUserName: string }) {
         <div className="p-3 flex border-b items-center">
           {selectedConversation && (
             <div className="flex items-center gap-2">
-              <Avatar className="border w-10 h-10">
-                <AvatarImage src="/placeholder-user.jpg" alt="Image" />
-                <AvatarFallback>OM</AvatarFallback>
-              </Avatar>
               <div className="grid gap-0.5">
                 <p className="text-sm font-medium leading-none">
-                  {selectedConversation.participants.join(", ")}
+                  {getContactName(selectedConversation.participants)}
                 </p>
                 <p className="text-xs text-muted-foreground">Active now</p>
               </div>
             </div>
           )}
         </div>
-        <div className="grid gap-4 p-3 flex-grow overflow-y-auto"> {/* Added flex-grow and overflow-y-auto */}
-          {messages.map((message) => (
-            <div key={message.id} className={`flex w-max max-w-[65%] flex-col gap-2 rounded-full px-4 py-2 text-sm ${message.from === "currentUserId" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
-              {message.content}
-            </div>
-          ))}
+        <div className="grid gap-4 p-3 flex-grow overflow-y-auto">
+          {messages
+            .filter((message) => message.content.trim() !== "")
+            .map((message) => (
+              <div key={message.id} className={`flex w-max max-w-[65%] flex-col gap-2 rounded-full px-4 py-2 text-sm ${message.from === currentUserName ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
+                {message.content}
+              </div>
+            ))}
         </div>
         <div className="border-t">
           <form className="flex w-full items-center space-x-2 p-3" onSubmit={handleSendMessage}>

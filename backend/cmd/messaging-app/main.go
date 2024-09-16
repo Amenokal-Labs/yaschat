@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 
 	"github.com/gorilla/mux"
 )
@@ -118,7 +119,9 @@ func createConversation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Received conversation: %+v", conversation)
+	sort.Strings(conversation.Participants)
+	log.Printf("Sorted participants: %+v", conversation.Participants)
+
 	conversation.ConversationID = conversation.Participants[0] + "-" + conversation.Participants[1]
 	conversation.LastMessage = Message{}
 
@@ -168,7 +171,9 @@ func getConversations(w http.ResponseWriter, r *http.Request) {
 	conversations := make(map[string]Conversation)
 	for _, record := range records[1:] {
 		if record[1] == userName || record[2] == userName {
-			convID := record[1] + "-" + record[2]
+			participants := []string{record[1], record[2]}
+			sort.Strings(participants)
+			convID := participants[0] + "-" + participants[1]
 			var lastMessage Message
 			if record[3] == "" && record[4] == "" {
 				lastMessage = Message{}
@@ -227,7 +232,10 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 
 	var messages []Message
 	for _, record := range records[1:] {
-		convID := record[1] + "-" + record[2]
+		participants := []string{record[1], record[2]}
+		sort.Strings(participants)
+		convID := participants[0] + "-" + participants[1]
+
 		if convID == conversationID {
 			msg := Message{
 				ID:        record[0],
