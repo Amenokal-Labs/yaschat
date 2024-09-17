@@ -31,6 +31,37 @@
     --chart-5: 27 87% 67%;
   }
 
+  /* Styling for individual messages */
+  .message-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px; /* Adjust padding */
+    border-radius: 10px; /* Small rectangle appearance */
+    background-color: var(--bg-muted);
+    font-size: 14px;
+    max-width: 65%; /* Messages don't span too much width */
+    margin-bottom: 5px; /* Some spacing between messages */
+    word-wrap: break-word;
+    min-height: 40px; /* Ensure a small but readable height */
+  }
+
+  /* Custom colors for messages */
+  .message-container.user-message {
+    background-color: #007bff; /* Blue for the current user's messages */
+    color: white;
+    margin-left: auto;
+  }
+
+  .message-container.other-message {
+    background-color: #f0f0f0; /* Grey for the other user's messages */
+    color: black;
+  }
+
+  .message-text {
+    white-space: pre-wrap;
+    overflow-wrap: break-word; /* Ensure long text wraps properly */
+  }
+
   .dark {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;

@@ -71,7 +71,6 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
       const newConv = await response.json();
 
-      // Check if the new conversation is valid
       if (newConv && Array.isArray(conversations)) {
         setConversations((prevConversations) => [...(prevConversations || []), newConv]);
       }
@@ -117,8 +116,8 @@ export function Component({ currentUserName }: { currentUserName: string }) {
   };
 
   return (
-    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-full min-h-[500px] rounded-lg overflow-hidden border">
-      <div className="bg-muted/20 p-3 border-r flex flex-col h-full">
+    <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-auto min-h-[500px] rounded-lg overflow-hidden border">
+      <div className="bg-muted/20 p-3 border-r flex flex-col h-[80vh]"> {/* Smaller height */}
         <div className="flex items-center justify-between space-x-4">
           <div className="font-medium text-sm">Messenger</div>
           <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={handleNewMessageClick}>
@@ -131,7 +130,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
             <Input placeholder="Search" className="h-8" />
           </form>
         </div>
-        <div className="grid gap-2 flex-grow overflow-y-auto">
+        <div className="grid gap-2 flex-grow overflow-y-auto max-h-[300px]"> {/* Smaller conversation list height */}
           {conversations?.length > 0 ? (
             conversations.map((conversation) => (
               <Link
@@ -155,7 +154,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
           )}
         </div>
       </div>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-[80vh]"> {/* Smaller messages section */}
         <div className="p-3 flex border-b items-center">
           {selectedConversation && (
             <div className="flex items-center gap-2">
@@ -168,11 +167,19 @@ export function Component({ currentUserName }: { currentUserName: string }) {
             </div>
           )}
         </div>
-        <div className="grid gap-4 p-3 flex-grow overflow-y-auto">
+        <div className="grid gap-4 p-3 flex-grow overflow-y-auto max-h-[500px]">
           {messages
             .filter((message) => message.content.trim() !== "")
             .map((message) => (
-              <div key={message.id} className={`flex w-max max-w-[65%] flex-col gap-2 rounded-full px-4 py-2 text-sm ${message.from === currentUserName ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
+              <div
+                key={message.id}
+                className={`flex w-max max-w-[65%] flex-col gap-1 px-3 py-2 text-sm rounded-lg shadow-sm ${
+                  message.from === currentUserName
+                    ? "ml-auto bg-blue-500 text-white" // Blue for your messages
+                    : "bg-gray-300 text-black" // Grey for contact's messages
+                }`}
+                style={{ minHeight: "40px" }} // Ensure there's a small height for each message box
+              >
                 {message.content}
               </div>
             ))}
