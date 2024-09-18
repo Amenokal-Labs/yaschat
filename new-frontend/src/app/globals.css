@@ -31,30 +31,29 @@
     --chart-5: 27 87% 67%;
   }
 
+  /* Reset default margins for paragraphs and headings */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+  }
+
   /* Styling for individual messages */
   .message-container {
     display: flex;
     align-items: center;
-    padding: 10px 15px; /* Adjust padding */
-    border-radius: 10px; /* Small rectangle appearance */
-    background-color: var(--bg-muted);
+    padding: 4px 8px; /* Reduced padding */
+    border-radius: 8px; /* Smaller border radius for a compact look */
     font-size: 14px;
     max-width: 65%; /* Messages don't span too much width */
-    margin-bottom: 5px; /* Some spacing between messages */
+    margin-bottom: 4px; /* Reduced spacing between messages */
     word-wrap: break-word;
-    min-height: 40px; /* Ensure a small but readable height */
-  }
-
-  /* Custom colors for messages */
-  .message-container.user-message {
-    background-color: #007bff; /* Blue for the current user's messages */
-    color: white;
-    margin-left: auto;
-  }
-
-  .message-container.other-message {
-    background-color: #f0f0f0; /* Grey for the other user's messages */
-    color: black;
+    background-color: #f0f0f0; /* Grey background for all messages */
+    color: black; /* Black text color */
   }
 
   .message-text {
@@ -62,6 +61,30 @@
     overflow-wrap: break-word; /* Ensure long text wraps properly */
   }
 
+  /* Remove special styling for user messages */
+  .message-container.user-message {
+    /* No special styles needed */
+  }
+
+  .message-container.other-message {
+    /* No special styles needed */
+  }
+
+  /* Styling for contact items */
+  .contact-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px; /* Reduced padding */
+    border-radius: 8px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+
+  .contact-item:hover {
+    background-color: var(--muted-foreground);
+  }
+
+  /* Dark mode variables */
   .dark {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
@@ -88,12 +111,13 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
+  /* Apply border color to all elements */
   * {
     @apply border-border;
   }
+
+  /* Base body styles */
   body {
     @apply bg-background text-foreground;
   }

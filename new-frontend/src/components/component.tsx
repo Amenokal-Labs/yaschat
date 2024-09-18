@@ -38,14 +38,16 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
   useEffect(() => {
     if (selectedConversation) {
-      fetch(`http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`)
+      fetch(
+        `http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`
+      )
         .then((response) => response.json())
         .then((data) => setMessages(data))
         .catch((error) => console.error("Error fetching messages:", error));
     }
   }, [selectedConversation]);
 
-  const getContactName = (participants: string[]): string|undefined => {
+  const getContactName = (participants: string[]): string | undefined => {
     return participants.find((name) => name !== currentUserName);
   };
 
@@ -91,18 +93,21 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const message = {
-      from_name: currentUserName,
-      to_name: getContactName(selectedConversation.participants),
+      from: currentUserName, // Ensure this matches your Message type
+      to: getContactName(selectedConversation.participants),
       content: newMessage,
       timestamp: new Date().toISOString(),
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(message),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send message");
@@ -117,34 +122,42 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
   return (
     <div className="grid grid-cols-[300px_1fr] max-w-4xl w-full h-auto min-h-[500px] rounded-lg overflow-hidden border">
-      <div className="bg-muted/20 p-3 border-r flex flex-col h-[80vh]"> {/* Smaller height */}
+      {/* Left Sidebar */}
+      <div className="bg-gray-100 p-3 border-r flex flex-col h-[80vh]">
         <div className="flex items-center justify-between space-x-4">
           <div className="font-medium text-sm">Messenger</div>
-          <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={handleNewMessageClick}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full w-8 h-8"
+            onClick={handleNewMessageClick}
+          >
             <PenIcon className="h-4 w-4" />
             <span className="sr-only">New message</span>
           </Button>
         </div>
-        <div className="py-4">
+        <div className="py-2">
           <form>
             <Input placeholder="Search" className="h-8" />
           </form>
         </div>
-        <div className="grid gap-2 flex-grow overflow-y-auto max-h-[300px]"> {/* Smaller conversation list height */}
+        {/* Conversation List */}
+        <div className="flex-grow overflow-y-auto max-h-[300px] space-y-1">
           {conversations?.length > 0 ? (
             conversations.map((conversation) => (
               <Link
                 key={conversation.conversation_id}
                 href="#"
-                className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 bg-muted"
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-200"
                 onClick={() => setSelectedConversation(conversation)}
               >
-                <div className="grid gap-0.5">
-                  <p className="text-sm font-medium leading-none">
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium m-0">
                     {getContactName(conversation.participants)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {conversation.last_message.content} &middot; {new Date(conversation.last_message.timestamp).toLocaleTimeString()}
+                  <p className="text-xs text-gray-500 m-0">
+                    {conversation.last_message.content} &middot;{" "}
+                    {new Date(conversation.last_message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               </Link>
@@ -154,31 +167,32 @@ export function Component({ currentUserName }: { currentUserName: string }) {
           )}
         </div>
       </div>
-      <div className="flex flex-col h-[80vh]"> {/* Smaller messages section */}
+      {/* Message Section */}
+      <div className="flex flex-col h-[80vh]">
         <div className="p-3 flex border-b items-center">
           {selectedConversation && (
             <div className="flex items-center gap-2">
-              <div className="grid gap-0.5">
-                <p className="text-sm font-medium leading-none">
+              <div className="flex flex-col">
+                <p className="text-sm font-medium m-0">
                   {getContactName(selectedConversation.participants)}
                 </p>
-                <p className="text-xs text-muted-foreground">Active now</p>
+                <p className="text-xs text-gray-500 m-0">Active now</p>
               </div>
             </div>
           )}
         </div>
-        <div className="grid gap-4 p-3 flex-grow overflow-y-auto max-h-[500px]">
+        {/* Messages */}
+        <div className="flex-grow overflow-y-auto p-3 space-y-2 max-h-[500px]">
           {messages
             .filter((message) => message.content.trim() !== "")
             .map((message) => (
               <div
                 key={message.id}
-                className={`flex w-max max-w-[65%] flex-col gap-1 px-3 py-2 text-sm rounded-lg shadow-sm ${
+                className={`flex w-max max-w-[65%] flex-col gap-1 px-3 py-1 text-sm rounded-lg ${
                   message.from === currentUserName
-                    ? "ml-auto bg-blue-500 text-white" // Blue for your messages
-                    : "bg-gray-300 text-black" // Grey for contact's messages
+                    ? "bg-blue-500 text-white ml-auto"
+                    : "bg-green-500 text-white"
                 }`}
-                style={{ minHeight: "40px" }} // Ensure there's a small height for each message box
               >
                 {message.content}
               </div>
