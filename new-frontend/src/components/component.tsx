@@ -8,8 +8,8 @@ import Link from "next/link";
 // Types for conversations and messages
 type Message = {
   id: string;
-  from: string;
-  to: string;
+  from_name: string;
+  to_name: string;
   content: string;
   timestamp: string;
 };
@@ -26,6 +26,8 @@ export function Component({ currentUserName }: { currentUserName: string }) {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
+
+  console.log(messages);
 
   useEffect(() => {
     if (currentUserName) {
@@ -93,8 +95,9 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const message = {
-      from: currentUserName, // Ensure this matches your Message type
-      to: getContactName(selectedConversation.participants),
+      id: new Date().getTime().toString(),
+      from_name: currentUserName, // Ensure this matches your Message type
+      to_name: getContactName(selectedConversation.participants),
       content: newMessage,
       timestamp: new Date().toISOString(),
     };
@@ -189,7 +192,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
               <div
                 key={message.id}
                 className={`flex w-max max-w-[65%] flex-col gap-1 px-3 py-1 text-sm rounded-lg ${
-                  message.from === currentUserName
+                  message.from_name === currentUserName
                     ? "bg-blue-500 text-white ml-auto"
                     : "bg-green-500 text-white"
                 }`}
