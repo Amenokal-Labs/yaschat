@@ -44,44 +44,56 @@ export function Component({ currentUserName }: { currentUserName: string }) {
         `http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`
       )
         .then((response) => response.json())
-        .then((data) => setMessages(data))
+        .then((data) => setMessages(Array.isArray(data) ? data : []))
         .catch((error) => console.error("Error fetching messages:", error));
     }
-  }, [selectedConversation]);
+  }, [selectedConversation]);  
 
-  const getContactName = (participants: string[]): string | undefined => {
-    return participants.find((name) => name !== currentUserName);
-  };
+  const getContactName = (participants: string[] | undefined): string => {
+    if (!participants) return "Unknown";
+    return participants.find((name) => name !== currentUserName) || "Unknown";
+  };  
 
   const createConversation = async (contactName: string) => {
     const participants = [currentUserName, contactName];
     const sortedParticipants = [...participants].sort();
-
-    const newConversation = {
+  
+    const newConversationPayload = {
       participants: sortedParticipants,
     };
-
+  
     try {
       const response = await fetch("http://localhost:8080/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newConversation),
+        body: JSON.stringify(newConversationPayload),
       });
-
+  
       if (!response.ok) {
-        const text = await response.text(); // Read the response as text
+        const text = await response.text();
         throw new Error(`Failed to create conversation: ${text}`);
       }
-
+  
       const newConv = await response.json();
-
-      if (newConv && Array.isArray(conversations)) {
-        setConversations((prevConversations) => [...(prevConversations || []), newConv]);
-      }
+  
+      // Construct a complete conversation object
+      const completeConversation: Conversation = {
+        conversation_id: newConv.conversation_id || new Date().getTime().toString(),
+        participants: newConv.participants || sortedParticipants,
+        last_message: newConv.last_message || {
+          id: "",
+          from_name: "",
+          to_name: "",
+          content: "",
+          timestamp: "",
+        },
+      };
+  
+      setConversations((prevConversations) => [...(prevConversations || []), completeConversation]);
     } catch (error) {
       console.error("Error creating conversation:", error);
     }
-  };
+  };  
 
   const handleNewMessageClick = () => {
     const contactName = prompt("Enter the name of the contact you want to message:");
@@ -146,7 +158,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
         </div>
         {/* Conversation List */}
         <div className="flex-grow overflow-y-auto max-h-[300px] space-y-1">
-          {conversations?.length > 0 ? (
+        {conversations?.length > 0 ? (
             conversations.map((conversation) => (
               <Link
                 key={conversation.conversation_id}
@@ -159,8 +171,10 @@ export function Component({ currentUserName }: { currentUserName: string }) {
                     {getContactName(conversation.participants)}
                   </p>
                   <p className="text-xs text-gray-500 m-0">
-                    {conversation.last_message.content} &middot;{" "}
-                    {new Date(conversation.last_message.timestamp).toLocaleTimeString()}
+                    {conversation.last_message?.content || "No messages yet"} &middot;{" "}
+                    {conversation.last_message?.timestamp
+                      ? new Date(conversation.last_message.timestamp).toLocaleTimeString()
+                      : ""}
                   </p>
                 </div>
               </Link>
