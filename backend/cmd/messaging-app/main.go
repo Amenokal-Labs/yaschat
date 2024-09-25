@@ -264,6 +264,11 @@ func getUserDetails(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+    if port == "" {
+       	port = "8080" // Default to 8080 if PORT is not set
+    }
+
 	r := mux.NewRouter()
 
 	r.Use(enableCORS)
@@ -286,13 +291,13 @@ func main() {
 	r.HandleFunc("/api/users/{user_id}", getUserDetails).Methods("GET")
 	r.HandleFunc("/api/login", loginUser).Methods("POST")
 
-	log.Println("Server starting on :8080")
+	log.Printf("Starting server on port %s\n", port)
 	if err := initializeCSV(); err != nil {
 		log.Fatalf("Failed to initialize CSV file: %v", err)
 	}
 	log.Println("CSV file initialized successfully")
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("could not start server: %s", err)
 	}
 }
