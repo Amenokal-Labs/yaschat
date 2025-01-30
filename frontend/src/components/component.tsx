@@ -31,7 +31,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
   useEffect(() => {
     if (currentUserName) {
-      fetch(`http://localhost:8080/api/conversations?name=${currentUserName}`)
+      fetch(`https://yaschat.onrender.com/api/conversations?name=${currentUserName}`)
         .then((response) => response.json())
         .then((data) => setConversations(data))
         .catch((error) => console.error("Error fetching conversations:", error));
@@ -41,7 +41,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
   useEffect(() => {
     if (selectedConversation) {
       fetch(
-        `http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`
+        `https://yaschat.onrender.com/api/conversations/${selectedConversation.conversation_id}/messages`
       )
         .then((response) => response.json())
         .then((data) => setMessages(Array.isArray(data) ? data : []))
@@ -63,7 +63,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
     };
   
     try {
-      const response = await fetch("http://localhost:8080/api/conversations", {
+      const response = await fetch("https://yaschat.onrender.com/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newConversationPayload),
@@ -116,7 +116,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/conversations/${selectedConversation.conversation_id}/messages`,
+        `https://yaschat.onrender.com/api/conversations/${selectedConversation.conversation_id}/messages`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
