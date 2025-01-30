@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, FormEvent, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function Login({ onLoginSuccess }) {
-  const [name, setName] = useState("");
+interface LoginProps {
+  onLoginSuccess: (name: string) => void;
+}
 
-  const handleLogin = async (e) => {
+export function Login({ onLoginSuccess }: LoginProps) {
+  const [name, setName] = useState<string>("");
+
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch("https://yaschat.onrender.com/api/login", {
@@ -16,7 +20,7 @@ export function Login({ onLoginSuccess }) {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("currentUserName", name);
-        onLoginSuccess(name); // Update the state in Home component
+        onLoginSuccess(name);
       } else {
         throw new Error(data.message);
       }
@@ -30,7 +34,7 @@ export function Login({ onLoginSuccess }) {
       <Input
         placeholder="Enter your name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
       />
       <Button type="submit">Login</Button>
     </form>

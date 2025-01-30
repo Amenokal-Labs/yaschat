@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, SVGProps} from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -236,7 +235,7 @@ export function Component({ currentUserName }: { currentUserName: string }) {
   );
 }
 
-function PenIcon(props) {
+function PenIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -255,7 +254,7 @@ function PenIcon(props) {
   );
 }
 
-function SendIcon(props) {
+function SendIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
